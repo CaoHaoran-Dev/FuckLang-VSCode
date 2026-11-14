@@ -1,0 +1,72 @@
+{
+  "name": "FuckLang",
+  "scopeName": "source.fucklang",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#keywords" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.fucklang",
+          "match": "//.*$"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.fucklang",
+          "match": "\\b(fuck|shit|damn|else|hell|break|bitch|ass|wtf|fk|orgy)\\b"
+        },
+        {
+          "name": "constant.language.boolean.fucklang",
+          "match": "\\b(bullshit|nobullshit|true|false)\\b"
+        },
+        {
+          "name": "keyword.other.namespace.fucklang",
+          "match": "\\b(str|arr|file)\\b"
+        },
+        {
+          "name": "support.function.builtin.fucklang",
+          "match": "\\b(len|push|pop|type|suck|fucking|fuckoff|slice|keys|values|contains)\\b"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.fucklang",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.fucklang",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.fucklang",
+          "match": "\\b\\d+\\b"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.fucklang",
+          "match": "(\\+=|-=|\\*=|/=|==|!=|<=|>=|\\+|-|\\*|/|=|<|>|!)"
+        }
+      ]
+    }
+  }
+}
