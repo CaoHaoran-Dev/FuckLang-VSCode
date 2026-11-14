@@ -1,0 +1,15 @@
+{
+  "name": "fucklang-client",
+  "description": "FuckLang LSP Client",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/vscode": "^1.146.0"
+  }
+}
