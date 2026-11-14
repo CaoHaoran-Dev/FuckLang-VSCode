@@ -3,6 +3,7 @@
   "displayName": "FuckLang for VS Code",
   "description": "Language support for FuckLang",
   "version": "0.0.1",
+  "publisher": "CaoHaoran-Dev",
   "engines": {
     "vscode": "^1.75.0"
   },
@@ -10,17 +11,13 @@
     "Programming Languages"
   ],
   "main": "./client/out/extension.js",
+  "activationEvents": [],
   "contributes": {
     "languages": [
       {
         "id": "fucklang",
-        "aliases": [
-          "FuckLang",
-          "fuck"
-        ],
-        "extensions": [
-          ".fuck"
-        ],
+        "aliases": ["FuckLang", "fuck"],
+        "extensions": [".fuck"],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -36,6 +33,36 @@
         "language": "fucklang",
         "path": "./snippets/fucklang.json"
       }
+    ],
+    "commands": [
+      {
+        "command": "fucklang.run",
+        "title": "Run FuckLang File",
+        "icon": "$(play)"
+      }
+    ],
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "fucklang.run",
+          "when": "resourceLangId == fucklang"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "fucklang.run",
+          "when": "resourceLangId == fucklang",
+          "group": "navigation"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "fucklang.run",
+        "key": "ctrl+f5",
+        "mac": "cmd+f5",
+        "when": "editorTextFocus && resourceLangId == fucklang"
+      }
     ]
   },
   "scripts": {
@@ -46,8 +73,8 @@
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^18.19.130",
-    "@types/vscode": "^1.146.0",
-    "typescript": "^5.9.3"
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "typescript": "^5.0.0"
   }
 }

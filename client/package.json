@@ -6,9 +6,11 @@
     "vscode": "^1.75.0"
   },
   "dependencies": {
+    "follow-redirects": "^1.16.3",
     "vscode-languageclient": "^9.0.1"
   },
   "devDependencies": {
+    "@types/follow-redirects": "^1.14.4",
     "@types/node": "^26.6.6",
     "@types/vscode": "^1.146.0"
   }
