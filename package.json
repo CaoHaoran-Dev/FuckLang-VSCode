@@ -4,22 +4,37 @@
   "description": "Language support for FuckLang",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.146.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Programming Languages"
   ],
   "contributes": {
-    "languages": [{
-      "id": "fucklang",
-      "aliases": ["FuckLang", "fucklang"],
-      "extensions": [".fuck"],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "fucklang",
-      "scopeName": "source.fucklang",
-      "path": "./syntaxes/fucklang.tmLanguage.json"
-    }]
+    "languages": [
+      {
+        "id": "fucklang",
+        "aliases": [
+          "FuckLang",
+          "fuck"
+        ],
+        "extensions": [
+          ".fuck"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "fucklang",
+        "scopeName": "source.fucklang",
+        "path": "./syntaxes/fucklang.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "fucklang",
+        "path": "./snippets/fucklang.json"
+      }
+    ]
   }
 }

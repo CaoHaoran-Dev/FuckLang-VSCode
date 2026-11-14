@@ -1,0 +1,117 @@
+{
+  "Print": {
+    "prefix": "fuck",
+    "body": ["fuck ${1:value}"],
+    "description": "打印输出"
+  },
+  "Variable Assignment": {
+    "prefix": "shit",
+    "body": ["shit ${1:name} = ${2:value}"],
+    "description": "声明并赋值变量"
+  },
+  "If Statement": {
+    "prefix": "damn",
+    "body": ["damn ${1:condition} {", "    ${2}", "}"],
+    "description": "条件判断 (if)"
+  },
+  "If Else Statement": {
+    "prefix": "damnelse",
+    "body": ["damn ${1:condition} {", "    ${2}", "} else {", "    ${3}", "}"],
+    "description": "条件判断带 else"
+  },
+  "Else If Statement": {
+    "prefix": "elsedamn",
+    "body": ["else damn ${1:condition} {", "    ${2}", "}"],
+    "description": "条件判断 else if"
+  },
+  "While Loop": {
+    "prefix": "hell",
+    "body": ["hell ${1:condition} {", "    ${2}", "}"],
+    "description": "while 循环"
+  },
+  "For Loop": {
+    "prefix": "orgy",
+    "body": ["orgy shit ${1:i} = 0; ${1:i} < ${2:10}; ${1:i} += 1 {", "    ${3}", "}"],
+    "description": "C 风格 for 循环"
+  },
+  "Break": {
+    "prefix": "break",
+    "body": ["break"],
+    "description": "跳出循环"
+  },
+  "Continue": {
+    "prefix": "fk",
+    "body": ["fk"],
+    "description": "继续下一次循环"
+  },
+  "Named Function": {
+    "prefix": "bitch",
+    "body": ["bitch ${1:name}(${2:args}) {", "    ${3}", "}"],
+    "description": "定义具名函数"
+  },
+  "Anonymous Function": {
+    "prefix": "bitchanon",
+    "body": ["bitch(${1:args}) {", "    ${2}", "}"],
+    "description": "定义匿名函数"
+  },
+  "Return": {
+    "prefix": "ass",
+    "body": ["ass ${1:value}"],
+    "description": "返回结果"
+  },
+  "Assertion": {
+    "prefix": "wtf",
+    "body": ["wtf ${1:condition}, \"${2:message}\""],
+    "description": "断言并抛出异常"
+  },
+  "Boolean True": {
+    "prefix": "bullshit",
+    "body": ["bullshit"],
+    "description": "布尔值 true"
+  },
+  "Boolean False": {
+    "prefix": "nobullshit",
+    "body": ["nobullshit"],
+    "description": "布尔值 false"
+  },
+  "Array Literal": {
+    "prefix": "arr",
+    "body": ["[${1}]"],
+    "description": "数组"
+  },
+  "Hash Literal": {
+    "prefix": "hash",
+    "body": ["{\"${1:key}\": ${2:value}}"],
+    "description": "字典 / 哈希表"
+  },
+  "Builtin len": {
+    "prefix": "len",
+    "body": ["len(${1:value})"],
+    "description": "获取长度 (String/Array/Hash)"
+  },
+  "Builtin push": {
+    "prefix": "push",
+    "body": ["push(${1:array}, ${2:value})"],
+    "description": "数组末尾追加"
+  },
+  "Builtin type": {
+    "prefix": "type",
+    "body": ["type(${1:value})"],
+    "description": "获取变量类型"
+  },
+  "Builtin suck": {
+    "prefix": "suck",
+    "body": ["suck()"],
+    "description": "从标准输入读取一行"
+  },
+  "Builtin fucking": {
+    "prefix": "fucking",
+    "body": ["fucking(\"${1:%v}\", ${2:value})"],
+    "description": "格式化打印 (类似 printf)"
+  },
+  "Builtin fuckoff": {
+    "prefix": "fuckoff",
+    "body": ["fuckoff(${1:0}, \"${2:message}\")"],
+    "description": "退出程序"
+  }
+}
