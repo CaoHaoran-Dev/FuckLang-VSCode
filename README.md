@@ -1,65 +1,84 @@
-# fucklang-vscode README
+# FuckLang for VS Code
 
-This is the README for your extension "fucklang-vscode". After writing up a brief description, we recommend including the following sections.
-
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+> The official Visual Studio Code extension for FuckLang — a lightweight, Turing-complete scripting language where the keywords are English profanity.
 
 ---
 
-## Working with Markdown
+## Overview
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+This extension provides first-class support for [FuckLang](https://github.com/CaoHaoran-Dev/FuckLang) inside Visual Studio Code. It brings syntax highlighting, smart code snippets, intelligent variable auto-completion (powered by a built-in LSP), and a seamless "one-click run" experience without the need to manually configure the interpreter path.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+The extension automatically detects your operating system (Windows, macOS, Linux) and architecture (x64, ARM64, RISC-V, LoongArch64), downloading the correct FuckLang interpreter in the background on first use.
 
-## For more information
+---
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+## Features
 
-**Enjoy!**
+- **Syntax Highlighting** — Full colorization for keywords, operators, built-ins, and string escapes.
+- **Smart Code Snippets** — Rapid generation of common FuckLang structures (`shit`, `damn`, `hell`, `orgy`, `bitch`) with intelligent Tab-stops.
+- **Intelligent Auto-completion** — A lightweight Language Server (LSP) actively scans your document to suggest user-defined variables and built-in functions.
+- **Zero Configuration** — No need to install Go or compile the interpreter yourself. The extension auto-downloads the correct native binary for your platform.
+- **One-Click Run** — Execute FuckLang files directly using the ▶️ play button in the top-right corner, via the right-click context menu, or with `Ctrl+F5` (`Cmd+F5` on macOS).
+- **Multi-Architecture** — Native support for x86_64, ARM64 (macOS/Linux/Windows), RISC-V (Linux), and LoongArch64 (Linux).
+
+---
+
+## Usage
+
+Create a file named `hello.fuck`:
+
+```fuck
+shit name = "world"
+fuck "hello " + name
+```
+
+### Running the Code
+1. Click the **▶️ (Run)** button in the editor title bar.
+2. Or right-click inside the editor and select **Run FuckLang File**.
+3. Or press **`Ctrl+F5`** (Windows/Linux) / **`Cmd+F5`** (macOS).
+
+The extension will use the integrated terminal to execute the code, ensuring full support for standard input functions like `suck()`.
+
+### Auto-completion & Snippets
+- Type `sh` and press `Tab` to instantly expand to `shit name = value`.
+- Type `orgy` and press `Tab` to generate a complete C-style loop.
+- Type a variable name you previously defined with `shit`, and the LSP will suggest it as you type.
+
+---
+
+## Architecture
+
+Unlike simple grammar-only extensions, this extension is split into two parts to provide dynamic features:
+
+- **Client (`client/src/extension.ts`)** — Manages the interpreter download logic, registers VS Code commands, and spawns the language server.
+- **Server (`server/src/server.ts`)** — A Language Server Protocol (LSP) implementation that parses the active document to provide context-aware variable completions.
+
+---
+
+## Extension Settings
+
+Currently, this extension works entirely out of the box. No manual configuration is required. The downloaded binaries are cached in your global VS Code storage directory (`~/.config/Code/User/globalStorage/CaoHaoran-Dev.fucklang-vscode` on Linux, or the equivalent `AppData` location on Windows).
+
+---
+
+## Known Issues
+
+- Hash printing order is unspecified (inherited from FuckLang's Go implementation).
+- The LSP currently uses regular expressions for variable extraction. Highly complex macro-level scopes may not be perfectly captured.
+
+---
+
+## Contributing
+
+Contributions, issues, and feature requests are welcome! 
+Feel free to check the [issues page](https://github.com/CaoHaoran-Dev/FuckLang-VSCode/issues).
+
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
