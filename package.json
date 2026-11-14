@@ -2,7 +2,7 @@
   "name": "fucklang-vscode",
   "displayName": "FuckLang for VS Code",
   "description": "Language support for FuckLang",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "CaoHaoran-Dev",
   "engines": {
     "vscode": "^1.75.0"
@@ -11,7 +11,10 @@
     "Programming Languages"
   ],
   "main": "./client/out/extension.js",
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:fucklang",
+    "onCommand:fucklang.run"
+  ],
   "contributes": {
     "languages": [
       {
