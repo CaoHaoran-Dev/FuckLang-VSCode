@@ -2,3 +2,24 @@
 .vscode-test/**
 .gitignore
 vsc-extension-quickstart.md
+.github/**
+tests/**
+
+# 源码与构建配置
+client/src/**
+server/src/**
+client/tsconfig.json
+server/tsconfig.json
+tsconfig.json
+**/tsconfig.tsbuildinfo
+**/*.map
+
+# 开发依赖与缓存（保留运行时 dependencies）
+**/node_modules/typescript/**
+**/node_modules/@types/**
+**/node_modules/.bin/**
+**/node_modules/.cache/**
+**/package-lock.json
+
+# 临时产物
+*.vsix
