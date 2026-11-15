@@ -3,7 +3,7 @@
   "displayName": "FuckLang for VS Code",
   "description": "Language support for FuckLang",
   "version": "1.1.0",
-  "publisher": "CaoHaoran-Dev",
+  "publisher": "caohaoran-dev",
   "engines": {
     "vscode": "^1.75.0"
   },
