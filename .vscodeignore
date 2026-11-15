@@ -8,21 +8,16 @@ tests/**
 # 源码与构建配置
 client/src/**
 server/src/**
+client/out/**
+server/out/**
 client/tsconfig.json
 server/tsconfig.json
 tsconfig.json
 **/tsconfig.tsbuildinfo
 **/*.map
-**/package-lock.json
 
-# 精准排除开发依赖（保留运行时 LSP 依赖）
-**/node_modules/typescript/**
-**/node_modules/@types/**
-**/node_modules/.bin/**
-**/node_modules/.cache/**
-**/node_modules/esbuild/**
-**/node_modules/webpack/**
-**/node_modules/ts-loader/**
+# 所有 node_modules 全部排除（依赖已内联）
+**/node_modules/**
 
 # 临时产物
 *.vsix

@@ -14,11 +14,10 @@ let outputChannel: vscode.LogOutputChannel;
 let terminal: vscode.Terminal | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
-  // log: true 返回 LogOutputChannel，满足 LanguageClientOptions.outputChannel 的类型要求
   outputChannel = vscode.window.createOutputChannel('FuckLang', { log: true });
   context.subscriptions.push(outputChannel);
 
-  // 1. 确保二进制文件存在并获取路径（失败不阻塞 LSP 和命令注册）
+  // 1. 确保二进制文件存在并获取路径
   try {
     cachedBinaryPath = await ensureFucklangBinary(context);
   } catch (err) {
@@ -40,7 +39,6 @@ export async function activate(context: vscode.ExtensionContext) {
     }
 
     const document = editor.document;
-    // 先保存，保证运行的是磁盘上的最新内容
     if (document.isDirty) {
       const saved = await document.save();
       if (!saved) {
@@ -56,8 +54,6 @@ export async function activate(context: vscode.ExtensionContext) {
     terminal = getOrCreateTerminal(cwd);
     terminal.show(true);
 
-    // 关键：PowerShell 需要用 & 调用运算符才能执行带引号的路径；
-    // cmd / bash / zsh 直接写引号路径即可。
     const cmd = buildRunCommand(interpreter, filePath);
     terminal.sendText(cmd, true);
   });
@@ -65,15 +61,12 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(runCommand);
 
   // 3. 启动 LSP 语言服务器
-  // 注意：asAbsolutePath 相对于扩展根目录，server 就在根目录下，不要带 ".."
-  const serverModule = context.asAbsolutePath(
-    path.join('server', 'out', 'server.js')
-  );
+  // bundle 后 server 位于 dist/server.js
+  const serverModule = context.asAbsolutePath(path.join('dist', 'server.js'));
 
   if (!fs.existsSync(serverModule)) {
     outputChannel.appendLine(`[LSP] 服务器入口不存在: ${serverModule}`);
-    outputChannel.appendLine('[LSP] 请先在 server 目录执行 npm run compile（或 tsc -b）');
-    // 不启动 LSP，但扩展其余功能（运行命令）仍可用
+    outputChannel.appendLine('[LSP] 请先执行 npm run bundle');
   } else {
     const serverOptions: ServerOptions = {
       run: { module: serverModule, transport: TransportKind.ipc },
@@ -114,7 +107,6 @@ export async function activate(context: vscode.ExtensionContext) {
       outputChannel.appendLine('[LSP] 语言服务器已启动');
     } catch (err: any) {
       outputChannel.appendLine(`[LSP] 启动失败: ${err?.stack ?? err}`);
-      // 关键：置空，避免 deactivate 对 startFailed 状态调用 stop()
       client = undefined;
     }
   }
@@ -129,15 +121,12 @@ export async function deactivate(): Promise<void> {
     try {
       await client.stop();
     } catch (err: any) {
-      // starting / startFailed 状态下 stop 会抛异常，静默忽略
       console.warn('[LSP] stop 异常（已忽略）:', err?.message ?? err);
     } finally {
       client = undefined;
     }
   }
 }
-
-// ---------- 终端复用 ----------
 
 function getOrCreateTerminal(cwd: string): vscode.Terminal {
   if (terminal && terminal.exitStatus === undefined) {
@@ -147,26 +136,16 @@ function getOrCreateTerminal(cwd: string): vscode.Terminal {
   return terminal;
 }
 
-// ---------- 根据 shell 类型构造运行命令 ----------
-
 function buildRunCommand(interpreter: string, filePath: string): string {
-  // 判断当前默认终端是否为 PowerShell（Windows 上 VS Code 默认可能是 PowerShell / cmd / Git Bash）
   const shell = vscode.env.shell || '';
   const isPowerShell = /powershell|pwsh/i.test(shell);
   const isWindows = process.platform === 'win32';
 
   if (isWindows && isPowerShell) {
-    // PowerShell：& 是调用运算符，必须加，否则引号路径被当成字符串
     return `& "${interpreter}" "${filePath}"`;
   }
-
-  // cmd / bash / zsh / fish：直接执行
   return `"${interpreter}" "${filePath}"`;
 }
-
-// ==========================================
-// 核心逻辑：检测、下载并赋权 FuckLang 二进制
-// ==========================================
 
 async function ensureFucklangBinary(context: vscode.ExtensionContext): Promise<string | null> {
   const platform = process.platform;
@@ -226,11 +205,9 @@ async function ensureFucklangBinary(context: vscode.ExtensionContext): Promise<s
   }, async () => {
     try {
       await downloadFile(downloadUrl, localPath);
-
       if (platform !== 'win32') {
         fs.chmodSync(localPath, 0o755);
       }
-
       vscode.window.showInformationMessage('FuckLang interpreter downloaded and configured successfully!');
       return localPath;
     } catch (error) {
