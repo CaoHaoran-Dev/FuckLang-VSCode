@@ -13,13 +13,16 @@ server/tsconfig.json
 tsconfig.json
 **/tsconfig.tsbuildinfo
 **/*.map
+**/package-lock.json
 
-# 开发依赖与缓存（保留运行时 dependencies）
+# 精准排除开发依赖（保留运行时 LSP 依赖）
 **/node_modules/typescript/**
 **/node_modules/@types/**
 **/node_modules/.bin/**
 **/node_modules/.cache/**
-**/package-lock.json
+**/node_modules/esbuild/**
+**/node_modules/webpack/**
+**/node_modules/ts-loader/**
 
 # 临时产物
 *.vsix
