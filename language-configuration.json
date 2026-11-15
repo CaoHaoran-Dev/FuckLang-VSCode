@@ -7,6 +7,7 @@
     ["[", "]"],
     ["(", ")"]
   ],
+  "wordPattern": "(-?\\d*\\.?\\d+)|([A-Za-z_]\\w*(\\.[A-Za-z_]\\w*)*)",
   "autoClosingPairs": [
     { "open": "{", "close": "}" },
     { "open": "[", "close": "]" },
@@ -18,5 +19,15 @@
     ["[", "]"],
     ["(", ")"],
     ["\"", "\""]
+  ],
+  "indentationRules": {
+    "increaseIndentPattern": "^.*\\{[^}\"']*$",
+    "decreaseIndentPattern": "^\\s*\\}"
+  },
+  "onEnterRules": [
+    {
+      "beforeText": "^\\s*(damn|else|hell|orgy|bitch).*\\{\\s*$",
+      "action": { "indent": "indent" }
+    }
   ]
 }

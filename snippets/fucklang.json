@@ -22,7 +22,7 @@
   "Else If Statement": {
     "prefix": "elsedamn",
     "body": ["else damn ${1:condition} {", "    ${2}", "}"],
-    "description": "条件判断 else if"
+    "description": "条件判断 else if（需紧跟在上一段的 } 之后）"
   },
   "While Loop": {
     "prefix": "hell",
@@ -113,5 +113,45 @@
     "prefix": "fuckoff",
     "body": ["fuckoff(${1:0}, \"${2:message}\")"],
     "description": "退出程序"
+  },
+  "str.split": {
+    "prefix": "str.split",
+    "body": ["str.split(${1:s}, \"${2:,}\")"],
+    "description": "按分隔符拆分字符串"
+  },
+  "str.join": {
+    "prefix": "str.join",
+    "body": ["str.join(${1:arr}, \"${2:,}\")"],
+    "description": "用分隔符连接字符串数组"
+  },
+  "arr.slice": {
+    "prefix": "arr.slice",
+    "body": ["arr.slice(${1:arr}, ${2:0}, ${3:len})"],
+    "description": "取子数组"
+  },
+  "arr.keys": {
+    "prefix": "arr.keys",
+    "body": ["arr.keys(${1:hash})"],
+    "description": "Hash 键数组"
+  },
+  "arr.values": {
+    "prefix": "arr.values",
+    "body": ["arr.values(${1:hash})"],
+    "description": "Hash 值数组"
+  },
+  "file.read": {
+    "prefix": "file.read",
+    "body": ["file.read(\"${1:path}\")"],
+    "description": "读取整个文件"
+  },
+  "file.write": {
+    "prefix": "file.write",
+    "body": ["file.write(\"${1:path}\", ${2:content})"],
+    "description": "写入文件"
+  },
+  "file.exists": {
+    "prefix": "file.exists",
+    "body": ["file.exists(\"${1:path}\")"],
+    "description": "文件是否存在"
   }
 }

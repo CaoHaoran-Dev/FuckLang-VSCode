@@ -8,85 +8,160 @@ import {
   TransportKind
 } from 'vscode-languageclient/node';
 
-let client: LanguageClient;
+let client: LanguageClient | undefined;
 let cachedBinaryPath: string | null = null;
+let outputChannel: vscode.LogOutputChannel;
+let terminal: vscode.Terminal | undefined;
 
 export async function activate(context: vscode.ExtensionContext) {
-  // 1. 确保二进制文件存在并获取路径
-  cachedBinaryPath = await ensureFucklangBinary(context);
+  // log: true 返回 LogOutputChannel，满足 LanguageClientOptions.outputChannel 的类型要求
+  outputChannel = vscode.window.createOutputChannel('FuckLang', { log: true });
+  context.subscriptions.push(outputChannel);
 
-  // 2. 注册运行 FuckLang 的命令
-  let runCommand = vscode.commands.registerCommand('fucklang.run', async () => {
+  // 1. 确保二进制文件存在并获取路径（失败不阻塞 LSP 和命令注册）
+  try {
+    cachedBinaryPath = await ensureFucklangBinary(context);
+  } catch (err) {
+    outputChannel.appendLine(`[binary] 初始化失败: ${err}`);
+    cachedBinaryPath = null;
+  }
+
+  // 2. 注册运行命令
+  const runCommand = vscode.commands.registerCommand('fucklang.run', async () => {
     const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-      return;
-    }
-
-    const document = editor.document;
-    if (document.languageId !== 'fucklang') {
+    if (!editor || editor.document.languageId !== 'fucklang') {
       vscode.window.showErrorMessage('This is not a FuckLang file.');
       return;
     }
 
     if (!cachedBinaryPath) {
-      vscode.window.showErrorMessage('FuckLang interpreter is not available.');
+      vscode.window.showErrorMessage('FuckLang interpreter is not available. Check the Output panel.');
       return;
     }
 
-    // 运行前保存当前文件到临时文件
-    const tempFilePath = path.join(
-      context.globalStorageUri.fsPath,
-      `temp_run_${Date.now()}.fuck`
-    );
-    fs.writeFileSync(tempFilePath, document.getText());
+    const document = editor.document;
+    // 先保存，保证运行的是磁盘上的最新内容
+    if (document.isDirty) {
+      const saved = await document.save();
+      if (!saved) {
+        vscode.window.showErrorMessage('保存文件失败，无法运行');
+        return;
+      }
+    }
 
-    // 使用 VS Code 终端执行
-    const terminal = vscode.window.createTerminal({
-      name: 'FuckLang Run',
-      cwd: path.dirname(document.uri.fsPath)
-    });
-    terminal.show();
-    terminal.sendText(`& "${cachedBinaryPath}" "${tempFilePath}"`);
+    const interpreter = cachedBinaryPath;
+    const filePath = document.uri.fsPath;
+    const cwd = path.dirname(filePath);
+
+    terminal = getOrCreateTerminal(cwd);
+    terminal.show(true);
+
+    // 关键：PowerShell 需要用 & 调用运算符才能执行带引号的路径；
+    // cmd / bash / zsh 直接写引号路径即可。
+    const cmd = buildRunCommand(interpreter, filePath);
+    terminal.sendText(cmd, true);
   });
 
   context.subscriptions.push(runCommand);
 
   // 3. 启动 LSP 语言服务器
+  // 注意：asAbsolutePath 相对于扩展根目录，server 就在根目录下，不要带 ".."
   const serverModule = context.asAbsolutePath(
-    path.join('..', 'server', 'out', 'server.js')
+    path.join('server', 'out', 'server.js')
   );
 
-  const serverOptions: ServerOptions = {
-    run: { module: serverModule, transport: TransportKind.ipc },
-    debug: {
-      module: serverModule,
-      transport: TransportKind.ipc,
-      options: { execArgv: ['--nolazy', '--inspect=6009'] }
+  if (!fs.existsSync(serverModule)) {
+    outputChannel.appendLine(`[LSP] 服务器入口不存在: ${serverModule}`);
+    outputChannel.appendLine('[LSP] 请先在 server 目录执行 npm run compile（或 tsc -b）');
+    // 不启动 LSP，但扩展其余功能（运行命令）仍可用
+  } else {
+    const serverOptions: ServerOptions = {
+      run: { module: serverModule, transport: TransportKind.ipc },
+      debug: {
+        module: serverModule,
+        transport: TransportKind.ipc,
+        options: { execArgv: ['--nolazy', '--inspect=6009'] }
+      }
+    };
+
+    const clientOptions: LanguageClientOptions = {
+      documentSelector: [{ scheme: 'file', language: 'fucklang' }],
+      synchronize: {
+        fileEvents: vscode.workspace.createFileSystemWatcher('**/*.fuck')
+      },
+      outputChannel,
+      errorHandler: {
+        error: (error, message, count) => {
+          outputChannel.appendLine(`[LSP error] ${error?.message ?? error}`);
+          return { action: 1 /* Continue */, handled: false } as any;
+        },
+        closed: () => {
+          outputChannel.appendLine('[LSP closed] 服务器连接已关闭，尝试重启由客户端决定');
+          return { action: 1 /* Continue */, handled: false } as any;
+        }
+      }
+    };
+
+    client = new LanguageClient(
+      'fucklangLanguageServer',
+      'FuckLang Language Server',
+      serverOptions,
+      clientOptions
+    );
+
+    try {
+      await client.start();
+      outputChannel.appendLine('[LSP] 语言服务器已启动');
+    } catch (err: any) {
+      outputChannel.appendLine(`[LSP] 启动失败: ${err?.stack ?? err}`);
+      // 关键：置空，避免 deactivate 对 startFailed 状态调用 stop()
+      client = undefined;
     }
-  };
-
-  const clientOptions: LanguageClientOptions = {
-    documentSelector: [{ scheme: 'file', language: 'fucklang' }],
-    synchronize: {
-      fileEvents: vscode.workspace.createFileSystemWatcher('**/*.fuck')
-    }
-  };
-
-  client = new LanguageClient(
-    'fucklangLanguageServer',
-    'FuckLang Language Server',
-    serverOptions,
-    clientOptions
-  );
-
-  client.start();
+  }
 }
 
-export function deactivate(): Thenable<void> | undefined {
-  if (!client) {
-    return undefined;
+export async function deactivate(): Promise<void> {
+  if (terminal) {
+    terminal.dispose();
+    terminal = undefined;
   }
-  return client.stop();
+  if (client) {
+    try {
+      await client.stop();
+    } catch (err: any) {
+      // starting / startFailed 状态下 stop 会抛异常，静默忽略
+      console.warn('[LSP] stop 异常（已忽略）:', err?.message ?? err);
+    } finally {
+      client = undefined;
+    }
+  }
+}
+
+// ---------- 终端复用 ----------
+
+function getOrCreateTerminal(cwd: string): vscode.Terminal {
+  if (terminal && terminal.exitStatus === undefined) {
+    return terminal;
+  }
+  terminal = vscode.window.createTerminal({ name: 'FuckLang Run', cwd });
+  return terminal;
+}
+
+// ---------- 根据 shell 类型构造运行命令 ----------
+
+function buildRunCommand(interpreter: string, filePath: string): string {
+  // 判断当前默认终端是否为 PowerShell（Windows 上 VS Code 默认可能是 PowerShell / cmd / Git Bash）
+  const shell = vscode.env.shell || '';
+  const isPowerShell = /powershell|pwsh/i.test(shell);
+  const isWindows = process.platform === 'win32';
+
+  if (isWindows && isPowerShell) {
+    // PowerShell：& 是调用运算符，必须加，否则引号路径被当成字符串
+    return `& "${interpreter}" "${filePath}"`;
+  }
+
+  // cmd / bash / zsh / fish：直接执行
+  return `"${interpreter}" "${filePath}"`;
 }
 
 // ==========================================
@@ -96,8 +171,7 @@ export function deactivate(): Thenable<void> | undefined {
 async function ensureFucklangBinary(context: vscode.ExtensionContext): Promise<string | null> {
   const platform = process.platform;
   const arch = process.arch;
-  
-  // 映射表
+
   const downloadUrls: Record<string, string> = {
     "fucklang-darwin-arm64": "https://github.com/CaoHaoran-Dev/FuckLang/releases/latest/download/fucklang-darwin-arm64",
     "fucklang-darwin-amd64": "https://github.com/CaoHaoran-Dev/FuckLang/releases/latest/download/fucklang-darwin-amd64",
@@ -109,7 +183,6 @@ async function ensureFucklangBinary(context: vscode.ExtensionContext): Promise<s
     "fucklang-windows-amd64.exe": "https://github.com/CaoHaoran-Dev/FuckLang/releases/latest/download/fucklang-windows-amd64.exe"
   };
 
-  // 确定目标文件名
   let targetName = '';
   if (platform === 'win32') {
     targetName = arch === 'x64' ? 'fucklang-windows-amd64.exe' : 'fucklang-windows-arm64.exe';
@@ -135,18 +208,15 @@ async function ensureFucklangBinary(context: vscode.ExtensionContext): Promise<s
   if (!fs.existsSync(binDir)) {
     fs.mkdirSync(binDir, { recursive: true });
   }
-  
+
   const localPath = path.join(binDir, targetName);
 
-  // 检查是否已经存在且大小大于 0
   if (fs.existsSync(localPath)) {
     const stats = fs.statSync(localPath);
-    // 只要文件大于 0 字节就认为下载过了（应对小体积二进制）
     if (stats.size > 0) {
       return localPath;
-    } else {
-      fs.unlinkSync(localPath); // 0 字节，删掉重下
     }
+    fs.unlinkSync(localPath);
   }
 
   return vscode.window.withProgress({
@@ -156,11 +226,11 @@ async function ensureFucklangBinary(context: vscode.ExtensionContext): Promise<s
   }, async () => {
     try {
       await downloadFile(downloadUrl, localPath);
-      
+
       if (platform !== 'win32') {
         fs.chmodSync(localPath, 0o755);
       }
-      
+
       vscode.window.showInformationMessage('FuckLang interpreter downloaded and configured successfully!');
       return localPath;
     } catch (error) {
@@ -170,7 +240,6 @@ async function ensureFucklangBinary(context: vscode.ExtensionContext): Promise<s
   });
 }
 
-// 使用原生 fetch 下载，彻底解决 0KB 问题
 async function downloadFile(url: string, dest: string): Promise<void> {
   const response = await fetch(url, {
     headers: { 'User-Agent': 'vscode-fucklang-extension' },

@@ -3,8 +3,10 @@
   "scopeName": "source.fucklang",
   "patterns": [
     { "include": "#comments" },
-    { "include": "#keywords" },
     { "include": "#strings" },
+    { "include": "#keywords" },
+    { "include": "#namespaces" },
+    { "include": "#builtins" },
     { "include": "#numbers" },
     { "include": "#operators" }
   ],
@@ -13,27 +15,8 @@
       "patterns": [
         {
           "name": "comment.line.double-slash.fucklang",
-          "match": "//.*$"
-        }
-      ]
-    },
-    "keywords": {
-      "patterns": [
-        {
-          "name": "keyword.control.fucklang",
-          "match": "\\b(fuck|shit|damn|else|hell|break|bitch|ass|wtf|fk|orgy)\\b"
-        },
-        {
-          "name": "constant.language.boolean.fucklang",
-          "match": "\\b(bullshit|nobullshit|true|false)\\b"
-        },
-        {
-          "name": "keyword.other.namespace.fucklang",
-          "match": "\\b(str|arr|file)\\b"
-        },
-        {
-          "name": "support.function.builtin.fucklang",
-          "match": "\\b(len|push|pop|type|suck|fucking|fuckoff|slice|keys|values|contains)\\b"
+          "begin": "//",
+          "end": "$"
         }
       ]
     },
@@ -49,6 +32,38 @@
               "match": "\\\\."
             }
           ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.fucklang",
+          "match": "\\b(fuck|shit|damn|else|hell|break|bitch|ass|wtf|fk|orgy)\\b"
+        },
+        {
+          "name": "constant.language.boolean.fucklang",
+          "match": "\\b(bullshit|nobullshit|true|false)\\b"
+        }
+      ]
+    },
+    "namespaces": {
+      "patterns": [
+        {
+          "name": "keyword.other.namespace.fucklang",
+          "match": "\\b(str|arr|file)\\b(?=\\s*\\.)"
+        },
+        {
+          "name": "variable.other.property.fucklang",
+          "match": "(?<=\\.)\\s*[A-Za-z_]\\w*"
+        }
+      ]
+    },
+    "builtins": {
+      "patterns": [
+        {
+          "name": "support.function.builtin.fucklang",
+          "match": "\\b(len|push|pop|type|suck|fucking|fuckoff|slice|keys|values|contains|upper|lower|trim|split|replace|join|read|write|exists)\\b(?=\\s*\\()"
         }
       ]
     },
